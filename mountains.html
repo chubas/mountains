@@ -10,7 +10,7 @@
 		<script>
 			$(function() {
 
-				var resolution = 3; // e.g. 2 ^ 3 + 1 = 9x9 matrix;
+				var resolution = 4; // e.g. 2 ^ 3 + 1 = 9x9 matrix;
 				var size = Math.pow(2, resolution) + 1;
 				var middle = Math.floor(size / 2);
 
@@ -49,6 +49,7 @@
 				};
 
 				var get = function(x, y) {
+					console.log("Getting at:", x, y);
 					if(x < 0 || x >= grid.length || y < 0 || y >= grid.length) {
 						return undefined;
 					}
@@ -105,7 +106,8 @@
 					console.log("Getting Diamonds");
 					var diamonds = getDiamondCoords(resolution, i);
 					console.log("Diamonds:")
-					diamondCheckSize = Math.pow(2, 3 - i);
+					diamondCheckSize = Math.pow(2, resolution - i);
+					console.log("Diamond check size = ", diamondCheckSize);
 					diamonds.forEach(function(coord) {
 						var dX = coord[0],
 							dY = coord[1];
@@ -142,7 +144,8 @@
 
 						console.log("Squares:")
 						var squares = getSquareCoords(resolution, i);
-						squareCheckSize = Math.pow(2, 3 - i - 1);
+						squareCheckSize = Math.pow(2, resolution - i - 1);
+						console.log("squareCheckSize : ", squareCheckSize)
 						squares.forEach(function(coord) {
 							var dX = coord[0],
 							dY = coord[1];
