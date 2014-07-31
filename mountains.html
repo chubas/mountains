@@ -4,179 +4,50 @@
 			table {
 				border: 1px solid blue;
 			}
+			td {
+				font-size: 10px;
+			}
 		</style>
 		<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
 		<script type="text/javascript" src="/underscore-min.js"></script>
+		<script type="text/javascript" src="/mountain-generator.js"></script>
 		<script>
 			$(function() {
 
-				var resolution = 4; // e.g. 2 ^ 3 + 1 = 9x9 matrix;
-				var size = Math.pow(2, resolution) + 1;
-				var middle = Math.floor(size / 2);
+				var mountain = new MountainGenerator({
+					resolution : 5,
+					randomness : 60,
+					seed : 100,
+				}).generate();
+				console.log("MOUNTAIN", mountain);
 
-				var seed = 100;
+				var getMax = function(grid) {
+		            return Math.max.apply(null, grid.map(function(row) {
+		                return Math.max.apply(null, row);
+		            }));
+		        };
 
-				var grid = [];
-				for(var y = 0; y < size; y++) {
-					grid[y] = [];
-					for(var x = 0; x < size; x ++) {
-						grid[y][x] = null;
-					}
-				}
+				var drawGrid = function(grid) {
+		            var max = getMax(grid);
+		            var table = $('<table>').appendTo($('.viz'));
+		            for(var y = 0; y < grid.length; y++) {
+		                var tr = $('<tr>').appendTo(table);
+		                for(var x = 0; x < grid.length; x++) {
+		                    var val = grid[y][x];
+		                    var color = val !== null ? Math.round(val * 255 / max) : 255;
+		                    // console.log("vAL:", val);
+		                    // console.log("COLOR: ", color);
+		                    var c = 'rgb(' + [color, color, color].join(',') + ')';
+		                    var s = val ? val.toFixed(2) : val;
+		                    $('<td>').text(s).appendTo(tr).css({
+		                        'background-color' : c
+		                    });
+		                }
+		            }
+		        };
 
-				/* Assign the center and the corners. This will be the seed */
-				grid[0][0] = grid[0][size - 1] = grid[size - 1][0] = grid[size - 1][size - 1] = 0;
-				grid[middle][middle] = 100;
+		        drawGrid(mountain);
 
-				var drawGrid = function() {
-					var table = $('<table>').appendTo($('.viz'));
-					for(var y = 0; y < grid.length; y++) {
-						var tr = $('<tr>').appendTo(table);
-						for(var x = 0; x < grid.length; x++) {
-							$('<td>').text(grid[y][x]).appendTo(tr);
-						}
-					}
-				};
-
-				var expand = function(coords) {
-					var result = [];
-					coords.forEach(function(y) {
-						coords.forEach(function(x){
-							result.push([y, x]);
-						});
-					});
-					return result;
-				};
-
-				var get = function(x, y) {
-					console.log("Getting at:", x, y);
-					if(x < 0 || x >= grid.length || y < 0 || y >= grid.length) {
-						return undefined;
-					}
-
-					return grid[y][x];
-				};
-
-				var getDiamondCoords = function(resolution, currentIter) {
-					var size = Math.pow(2, resolution);
-					var step = size / Math.pow(2, currentIter);
-					var g = [];
-					console.log("Size, step: ", size, step)
-					for(var y = 0; y <= size; y += step) {
-						for(var x = 0; x <= size; x += step) {
-							if(grid[y][x] === null) {
-								g.push([y, x]);
-							}
-						}
-					}
-					return g;
-				};
-
-
-				var getSquareCoords = function(resolution, currentIter) {
-					var size = Math.pow(2, resolution);
-
-					var numberOfDivisions = Math.pow(2, currentIter);
-					var step = size / numberOfDivisions;
-					var g = [];
-					console.log("Size, step: ", size, step)
-					for(var y = 0; y < size; y += step) {
-						for(var x = 0; x < size; x += step) {
-							g.push([y + step / 2, x + step / 2]);
-						}
-					}
-					return g;
-				};
-
-				var f = function(array) {
-					console.log(array.map(function(a) {
-						return '[' + a.join(',') + ']';
-					}).join(','))
-				};
-
-				var average = function(array) {
-					return _.reduce(array, function(mem, n) { return mem + n; }) / array.length;
-				};
-
-				var squareCheckSize, diamondCheckSize;
-				for(var i = 1; i <= resolution; i++) {
-					console.log("Iteration: ", i);
-
-					console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-					console.log("Getting Diamonds");
-					var diamonds = getDiamondCoords(resolution, i);
-					console.log("Diamonds:")
-					diamondCheckSize = Math.pow(2, resolution - i);
-					console.log("Diamond check size = ", diamondCheckSize);
-					diamonds.forEach(function(coord) {
-						var dX = coord[0],
-							dY = coord[1];
-
-						var values = [
-							[0, -diamondCheckSize],
-							[diamondCheckSize, 0],
-							[0, diamondCheckSize],
-							[-diamondCheckSize, 0]
-						].map(function(deltaCoord) {
-							return get(dX + deltaCoord[0], dY + deltaCoord[1]);
-						});
-
-						var vals = _.filter(values, function(v) {
-							return typeof v !== 'undefined';
-						});
-
-						var result = average(vals);
-
-						console.log("Values for diamond:", vals, result);
-
-						grid[dY][dX] = result;
-
-					});
-					drawGrid();
-					f(diamonds);
-					// console.log("Diamonds: ", diamonds);
-
-					console.log("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
-
-					if(i !== resolution) {
-						console.log("[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[");
-						console.log("Getting squares");
-
-						console.log("Squares:")
-						var squares = getSquareCoords(resolution, i);
-						squareCheckSize = Math.pow(2, resolution - i - 1);
-						console.log("squareCheckSize : ", squareCheckSize)
-						squares.forEach(function(coord) {
-							var dX = coord[0],
-							dY = coord[1];
-
-							var values = [
-								[-squareCheckSize, -squareCheckSize],
-								[ squareCheckSize, -squareCheckSize],
-								[ squareCheckSize,  squareCheckSize],
-								[-squareCheckSize,  squareCheckSize],
-							].map(function(deltaCoord) {
-								return get(dX + deltaCoord[0], dY + deltaCoord[1]);
-							});
-
-							var vals = _.filter(values, function(v) {
-								return typeof v !== 'undefined';
-							});
-
-							var result = average(vals);
-
-							console.log("Values for square:", vals, result);
-
-							grid[dY][dX] = result;
-						});
-						drawGrid();
-						f(squares);
-						// console.log("Squares: ", squares);
-
-						console.log("]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]");
-					}
-
-				}
 
 			});
 		</script>
