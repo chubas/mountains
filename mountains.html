@@ -19,9 +19,9 @@
 			$(function() {
 
 				var mountain = new MountainGenerator({
-					resolution : 5,
-					randomness : 60,
-					seed : 100,
+					resolution : 2,
+					randomness : 3,
+					seed : 10,
 				}).generate();
 				console.log("MOUNTAIN", mountain);
 
@@ -78,9 +78,17 @@
 		        	if(x == grid.length - 1 || y == grid.length - 1) {
 		        		return;
 		        	}
-		        	var xPos = startX + (x * tw / 2) - (y * tw / 2);
-		        	var yPos = startY + (x * th / 2) - (y * th / 2);
 
+		        	var xPos, yPos;
+		        	if(y % 2 == 0) {
+			        	xPos = startX + (x * tw) - (y * tw);
+			        	yPos = startY + (x * th) + (y * th);
+		        	} else {
+			        	xPos = startX + ((x + 1) * tw) - (y * tw);
+			        	yPos = startY + ((x - 1) * th) + (y * th);
+		        	}
+
+		        	console.group([x, y]);
 		        	console.log("STARTING POINT: ", x, y, xPos, yPos)
 
         			var NW = Math.round(grid[y][x]),
@@ -97,11 +105,12 @@
         			console.log("SE: ", SE_POS);
         			console.log("SW: ", SW_POS);
 
-		        	if(x % 2 == 0) {
+		        	if(y % 2 == 0) {
 	        			// Draws the ABC triangle, with A in the top and
 	        			// BC in the sides
 						context.beginPath()
-						context.fillStyle = color(NW, (NE + SW) / 2);
+						//context.fillStyle = color(NW, (NE + SW) / 2);
+						context.fillStyle = 'red';
 						context.moveTo(NW_POS[0], NW_POS[1]);
 						context.lineTo(NE_POS[0], NE_POS[1]);
 						context.lineTo(SW_POS[0], SW_POS[1]);
@@ -111,7 +120,8 @@
 	        			// Draws the CDB triangle, with D in the bottom and
 	        			// CB in the sides
 						context.beginPath()
-						context.fillStyle = color((NE + SW) / 2, SE);
+						// context.fillStyle = color((NE + SW) / 2, SE);
+						context.fillStyle = 'green';
 						context.moveTo(SE_POS[0], SE_POS[1]);
 						context.lineTo(NE_POS[0], NE_POS[1]);
 						context.lineTo(SW_POS[0], SW_POS[1]);
@@ -119,6 +129,7 @@
 						context.closePath();
 	        		}
 
+	        		console.groupEnd();
 
 		        	//
 

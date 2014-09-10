@@ -7,12 +7,12 @@ MountainGenerator = function(config) {
 
     this.generate = function() {
 
-        var resolution = 5; // e.g. 2 ^ 3 + 1 = 9x9 matrix;
-        var randomness = 60;
+        var resolution = this.resolution; // e.g. 2 ^ 3 + 1 = 9x9 matrix;
+        var randomness = this.randomness;
         var size = Math.pow(2, resolution) + 1;
         var middle = Math.floor(size / 2);
 
-        var seed = 100;
+        var seed = this.seed;
 
         var grid = [];
         for(var y = 0; y < size; y++) {
@@ -24,7 +24,7 @@ MountainGenerator = function(config) {
 
         /* Assign the center and the corners. This will be the seed */
         grid[0][0] = grid[0][size - 1] = grid[size - 1][0] = grid[size - 1][size - 1] = 0;
-        grid[middle][middle] = 100;
+        grid[middle][middle] = seed;
 
         var expand = function(coords) {
             var result = [];
