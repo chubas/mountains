@@ -19,11 +19,17 @@
 			$(function() {
 
 				var mountain = new MountainGenerator({
-					resolution : 2,
-					randomness : 3,
-					seed : 10,
+					resolution : 4,
+					randomness : 120,
+					seed : 500,
 				}).generate();
 				console.log("MOUNTAIN", mountain);
+	        	var startX = $('canvas').width() / 2;
+	        	var startY = $('canvas').height() / 2;
+	        	var stage = document.getElementById('stage');
+	        	var context = stage.getContext('2d');
+	        	var tw = 32, th = 24;
+
 
 				var getMax = function(grid) {
 		            return Math.max.apply(null, grid.map(function(row) {
@@ -32,22 +38,22 @@
 		        };
 
 				var drawGrid = function(grid) {
-		            var max = getMax(grid);
-		            var table = $('<table>').appendTo($('.viz'));
-		            for(var y = 0; y < grid.length; y++) {
-		                var tr = $('<tr>').appendTo(table);
-		                for(var x = 0; x < grid.length; x++) {
-		                    var val = grid[y][x];
-		                    var color = val !== null ? Math.round(val * 255 / max) : 255;
-		                    // console.log("vAL:", val);
-		                    // console.log("COLOR: ", color);
-		                    var c = 'rgb(' + [color, color, color].join(',') + ')';
-		                    var s = val ? val.toFixed(2) : val;
-		                    $('<td>').text(s).appendTo(tr).css({
-		                        'background-color' : c
-		                    });
-		                }
-		            }
+		            // var max = getMax(grid);
+		            // var table = $('<table>').appendTo($('.viz'));
+		            // for(var y = 0; y < grid.length; y++) {
+		            //     var tr = $('<tr>').appendTo(table);
+		            //     for(var x = 0; x < grid.length; x++) {
+		            //         var val = grid[y][x];
+		            //         var color = val !== null ? Math.round(val * 255 / max) : 255;
+		            //         // console.log("vAL:", val);
+		            //         // console.log("COLOR: ", color);
+		            //         var c = 'rgb(' + [color, color, color].join(',') + ')';
+		            //         var s = val ? val.toFixed(2) : val;
+		            //         $('<td>').text(s).appendTo(tr).css({
+		            //             'background-color' : c
+		            //         });
+		            //     }
+		            // }
 		            drawCanvas(grid);
 		        };
 
@@ -58,12 +64,6 @@
 		        		}
 		        	}
 		        };
-
-	        	var startX = 400;
-	        	var startY = 48;
-	        	var stage = document.getElementById('stage');
-	        	var context = stage.getContext('2d');
-	        	var tw = 32, th = 24;
 
 	        	var color = function(top, bottom) {
 	        		var r = Math.floor(((top - bottom) * 2.5) + 150);
@@ -79,14 +79,8 @@
 		        		return;
 		        	}
 
-		        	var xPos, yPos;
-		        	if(y % 2 == 0) {
-			        	xPos = startX + (x * tw) - (y * tw);
-			        	yPos = startY + (x * th) + (y * th);
-		        	} else {
-			        	xPos = startX + ((x + 1) * tw) - (y * tw);
-			        	yPos = startY + ((x - 1) * th) + (y * th);
-		        	}
+			        var xPos = startX + (x * tw / 2) - (y * tw / 2),
+			        	yPos = startY + (x * th / 2) + (y * th / 2);
 
 		        	console.group([x, y]);
 		        	console.log("STARTING POINT: ", x, y, xPos, yPos)
@@ -105,29 +99,29 @@
         			console.log("SE: ", SE_POS);
         			console.log("SW: ", SW_POS);
 
-		        	if(y % 2 == 0) {
+		        	// if(y % 2 == 0) {
 	        			// Draws the ABC triangle, with A in the top and
 	        			// BC in the sides
 						context.beginPath()
-						//context.fillStyle = color(NW, (NE + SW) / 2);
-						context.fillStyle = 'red';
+						context.fillStyle = color(NW, (NE + SW) / 2);
+						// context.fillStyle = 'red';
 						context.moveTo(NW_POS[0], NW_POS[1]);
 						context.lineTo(NE_POS[0], NE_POS[1]);
 						context.lineTo(SW_POS[0], SW_POS[1]);
 						context.fill();
 						context.closePath();
-	        		} else {
+
 	        			// Draws the CDB triangle, with D in the bottom and
 	        			// CB in the sides
 						context.beginPath()
-						// context.fillStyle = color((NE + SW) / 2, SE);
-						context.fillStyle = 'green';
+						context.fillStyle = color((NE + SW) / 2, SE);
+						// context.fillStyle = 'green';
 						context.moveTo(SE_POS[0], SE_POS[1]);
 						context.lineTo(NE_POS[0], NE_POS[1]);
 						context.lineTo(SW_POS[0], SW_POS[1]);
 						context.fill();
 						context.closePath();
-	        		}
+	        		// }
 
 	        		console.groupEnd();
 
@@ -177,7 +171,7 @@
 	<body>
 		<div class="viz">
 		</div>
-		<canvas id="stage" width="800" height="500">
+		<canvas id="stage" width="1200" height="900">
 		</canvas>
 	</body>
 </html>
