@@ -1,177 +1,181 @@
 <html>
-	<head>
-		<style>
-			table {
-				border: 1px solid blue;
-			}
-			td {
-				font-size: 10px;
-			}
+    <head>
+        <style>
+            table {
+                border: 1px solid blue;
+            }
+            td {
+                font-size: 10px;
+            }
 
-			#stage {
-				border: 2px solid blue;
-			}
-		</style>
-		<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
-		<script type="text/javascript" src="/underscore-min.js"></script>
-		<script type="text/javascript" src="/mountain-generator.js"></script>
-		<script>
-			$(function() {
+            #stage {
+                border: 2px solid blue;
+            }
+        </style>
+        <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <script type="text/javascript" src="/underscore-min.js"></script>
+        <script type="text/javascript" src="/mountain-generator.js"></script>
+        <script>
+            $(function() {
 
-				var mountain = new MountainGenerator({
-					resolution : 4,
-					randomness : 120,
-					seed : 500,
-				}).generate();
-				console.log("MOUNTAIN", mountain);
-	        	var startX = $('canvas').width() / 2;
-	        	var startY = $('canvas').height() / 2;
-	        	var stage = document.getElementById('stage');
-	        	var context = stage.getContext('2d');
-	        	var tw = 32, th = 24;
-
-
-				var getMax = function(grid) {
-		            return Math.max.apply(null, grid.map(function(row) {
-		                return Math.max.apply(null, row);
-		            }));
-		        };
-
-				var drawGrid = function(grid) {
-		            // var max = getMax(grid);
-		            // var table = $('<table>').appendTo($('.viz'));
-		            // for(var y = 0; y < grid.length; y++) {
-		            //     var tr = $('<tr>').appendTo(table);
-		            //     for(var x = 0; x < grid.length; x++) {
-		            //         var val = grid[y][x];
-		            //         var color = val !== null ? Math.round(val * 255 / max) : 255;
-		            //         // console.log("vAL:", val);
-		            //         // console.log("COLOR: ", color);
-		            //         var c = 'rgb(' + [color, color, color].join(',') + ')';
-		            //         var s = val ? val.toFixed(2) : val;
-		            //         $('<td>').text(s).appendTo(tr).css({
-		            //             'background-color' : c
-		            //         });
-		            //     }
-		            // }
-		            drawCanvas(grid);
-		        };
-
-		        var drawCanvas = function(grid) {
-		        	for(var y = 0; y < grid.length; y++) {
-		        		for(var x = 0; x < grid.length; x++) {
-		        			drawTile(x, y, grid);
-		        		}
-		        	}
-		        };
-
-	        	var color = function(top, bottom) {
-	        		var r = Math.floor(((top - bottom) * 2.5) + 150);
-	        		var g = 191;
-	        		var b = 64;
-	        		var color = "rgb(" + r + "," + g + "," + b + ")";
-	        		console.log("COLOR: ", color, top, bottom);
-	        		return color;
-	        	};
-
-		        var drawTile = function(x, y, grid) {
-		        	if(x == grid.length - 1 || y == grid.length - 1) {
-		        		return;
-		        	}
-
-			        var xPos = startX + (x * tw / 2) - (y * tw / 2),
-			        	yPos = startY + (x * th / 2) + (y * th / 2);
-
-		        	console.group([x, y]);
-		        	console.log("STARTING POINT: ", x, y, xPos, yPos)
-
-        			var NW = Math.round(grid[y][x]),
-        			    NE = Math.round(grid[y][x + 1]),
-        			    SE = Math.round(grid[y + 1][x + 1]),
-        			    SW = Math.round(grid[y + 1][x]);
-        			var NW_POS = [xPos, yPos - NW],
-        				NE_POS = [xPos + tw / 2, yPos - NE + th / 2],
-        				SW_POS = [xPos - tw / 2, yPos - SW + th / 2],
-        				SE_POS = [xPos, yPos - SE + th];
-
-        			console.log("NW: ", NW_POS);
-        			console.log("NE: ", NE_POS);
-        			console.log("SE: ", SE_POS);
-        			console.log("SW: ", SW_POS);
-
-		        	// if(y % 2 == 0) {
-	        			// Draws the ABC triangle, with A in the top and
-	        			// BC in the sides
-						context.beginPath()
-						context.fillStyle = color(NW, (NE + SW) / 2);
-						// context.fillStyle = 'red';
-						context.moveTo(NW_POS[0], NW_POS[1]);
-						context.lineTo(NE_POS[0], NE_POS[1]);
-						context.lineTo(SW_POS[0], SW_POS[1]);
-						context.fill();
-						context.closePath();
-
-	        			// Draws the CDB triangle, with D in the bottom and
-	        			// CB in the sides
-						context.beginPath()
-						context.fillStyle = color((NE + SW) / 2, SE);
-						// context.fillStyle = 'green';
-						context.moveTo(SE_POS[0], SE_POS[1]);
-						context.lineTo(NE_POS[0], NE_POS[1]);
-						context.lineTo(SW_POS[0], SW_POS[1]);
-						context.fill();
-						context.closePath();
-	        		// }
-
-	        		console.groupEnd();
-
-		        	//
-
-		        	// @draw_tile = (x,y) ->
-				    // # The `tile` function returns a hash containing four keys, nw, ne, sw, se, each
-				    // # with an associated height value.
-				    // tile = @height_map.tile(x,y)
-				    // # For each of these height values, scale it so that it looks good when displayed.
-				    // for point, height of tile
-				    //     tile[point] = @scale_height(height)
-				    // # The location of each tile is based on an isometric grid.
-				    // #
-				    // # As `x` increases the tile moves along the row, diagonally down and to the right, increasing x and increasing y.
-				    // # As `y` increases the tile moves along the column, diagonally down and to the left, decreasing x and increasing y.
-				    // # If `x` and `y` increase at the same rate then the tile moves straight downward, leaving x as it is and increasing y.
-				    // x_position = start_x + (x * tile_width  / 2) - (y * tile_width  / 2)
-				    // y_position = start_y + (x * tile_height / 2) + (y * tile_height / 2)
-				    // # Draw the tile as two polygons, a polygon for the back triangle, NW -> NE -> SW -> NW
-				    // @context
-				    //     .beginPath()
-				    //     .set("fillStyle", @colour(tile.nw, (tile.ne + tile.sw) / 2))
-				    //     .moveTo(x_position                 , y_position - tile.nw)
-				    //     .lineTo(x_position + tile_width / 2, y_position - tile.ne + tile_height / 2)
-				    //     .lineTo(x_position - tile_width / 2, y_position - tile.sw + tile_height / 2)
-				    //     .fill()
-				    //     .closePath()
-				    // # and a polygon for the front triangle, SE -> NE -> SW -> SE
-				    // @context
-				    //     .beginPath()
-				    //     .set("fillStyle", @colour((tile.ne + tile.sw) / 2, tile.se))
-				    //     .moveTo(x_position                 , y_position - tile.se + tile_height)
-				    //     .lineTo(x_position + tile_width / 2, y_position - tile.ne + tile_height / 2)
-				    //     .lineTo(x_position - tile_width / 2, y_position - tile.sw + tile_height / 2)
-				    //     .fill()
-				    //   .closePath()
-				    // tile
-		        };
-
-		        drawGrid(mountain);
+                var mountain = new MountainGenerator({
+                    resolution : 4,
+                    randomness : 200,
+                    seed : 500,
+                }).generate();
+                console.log("MOUNTAIN", mountain);
+                var startX = $('canvas').width() / 2;
+                var startY = $('canvas').height() / 2;
+                var stage = document.getElementById('stage');
+                var context = stage.getContext('2d');
+                var tw = 32, th = 24;
 
 
-			});
-		</script>
-	</head>
-	<body>
-		<div class="viz">
-		</div>
-		<canvas id="stage" width="1200" height="900">
-		</canvas>
-	</body>
+                var getMax = function(grid) {
+                    return Math.max.apply(null, grid.map(function(row) {
+                        return Math.max.apply(null, row);
+                    }));
+                };
+
+                var drawGrid = function(grid) {
+
+                    drawCanvas(grid);
+                };
+
+                var drawHeightTable = function() {
+                    var max = getMax(grid);
+                    var table = $('<table>').appendTo($('.viz'));
+                    for(var y = 0; y < grid.length; y++) {
+                        var tr = $('<tr>').appendTo(table);
+                        for(var x = 0; x < grid.length; x++) {
+                            var val = grid[y][x];
+                            var color = val !== null ? Math.round(val * 255 / max) : 255;
+                            // console.log("vAL:", val);
+                            // console.log("COLOR: ", color);
+                            var c = 'rgb(' + [color, color, color].join(',') + ')';
+                            var s = val ? val.toFixed(2) : val;
+                            $('<td>').text(s).appendTo(tr).css({
+                                'background-color' : c
+                            });
+                        }
+                    }
+                };
+
+                var drawCanvas = function(grid) {
+                    for(var y = 0; y < grid.length; y++) {
+                        for(var x = 0; x < grid.length; x++) {
+                            drawTile(x, y, grid);
+                        }
+                    }
+                };
+
+                var color = function(top, bottom) {
+                    var r = Math.floor(((top - bottom) * 2.5) + 150);
+                    var g = 191;
+                    var b = 64;
+                    var color = "rgb(" + r + "," + g + "," + b + ")";
+                    console.log("COLOR: ", color, top, bottom);
+                    return color;
+                };
+
+                var drawTile = function(x, y, grid) {
+                    if(x == grid.length - 1 || y == grid.length - 1) {
+                        return;
+                    }
+
+                    var xPos = startX + (x * tw / 2) - (y * tw / 2),
+                        yPos = startY + (x * th / 2) + (y * th / 2);
+
+                    console.group([x, y]);
+                    console.log("STARTING POINT: ", x, y, xPos, yPos)
+
+                    var NW = Math.round(grid[y][x]),
+                        NE = Math.round(grid[y][x + 1]),
+                        SE = Math.round(grid[y + 1][x + 1]),
+                        SW = Math.round(grid[y + 1][x]);
+                    var NW_POS = [xPos, yPos - NW],
+                        NE_POS = [xPos + tw / 2, yPos - NE + th / 2],
+                        SW_POS = [xPos - tw / 2, yPos - SW + th / 2],
+                        SE_POS = [xPos, yPos - SE + th];
+
+                    console.log("NW: ", NW_POS);
+                    console.log("NE: ", NE_POS);
+                    console.log("SE: ", SE_POS);
+                    console.log("SW: ", SW_POS);
+
+                    // if(y % 2 == 0) {
+                        // Draws the ABC triangle, with A in the top and
+                        // BC in the sides
+                        context.beginPath()
+                        context.fillStyle = color(NW, (NE + SW) / 2);
+                        // context.fillStyle = 'red';
+                        context.moveTo(NW_POS[0], NW_POS[1]);
+                        context.lineTo(NE_POS[0], NE_POS[1]);
+                        context.lineTo(SW_POS[0], SW_POS[1]);
+                        context.fill();
+                        context.closePath();
+
+                        // Draws the CDB triangle, with D in the bottom and
+                        // CB in the sides
+                        context.beginPath()
+                        context.fillStyle = color((NE + SW) / 2, SE);
+                        // context.fillStyle = 'green';
+                        context.moveTo(SE_POS[0], SE_POS[1]);
+                        context.lineTo(NE_POS[0], NE_POS[1]);
+                        context.lineTo(SW_POS[0], SW_POS[1]);
+                        context.fill();
+                        context.closePath();
+                    // }
+
+                    console.groupEnd();
+
+                    //
+
+                    // @draw_tile = (x,y) ->
+                    // # The `tile` function returns a hash containing four keys, nw, ne, sw, se, each
+                    // # with an associated height value.
+                    // tile = @height_map.tile(x,y)
+                    // # For each of these height values, scale it so that it looks good when displayed.
+                    // for point, height of tile
+                    //     tile[point] = @scale_height(height)
+                    // # The location of each tile is based on an isometric grid.
+                    // #
+                    // # As `x` increases the tile moves along the row, diagonally down and to the right, increasing x and increasing y.
+                    // # As `y` increases the tile moves along the column, diagonally down and to the left, decreasing x and increasing y.
+                    // # If `x` and `y` increase at the same rate then the tile moves straight downward, leaving x as it is and increasing y.
+                    // x_position = start_x + (x * tile_width  / 2) - (y * tile_width  / 2)
+                    // y_position = start_y + (x * tile_height / 2) + (y * tile_height / 2)
+                    // # Draw the tile as two polygons, a polygon for the back triangle, NW -> NE -> SW -> NW
+                    // @context
+                    //     .beginPath()
+                    //     .set("fillStyle", @colour(tile.nw, (tile.ne + tile.sw) / 2))
+                    //     .moveTo(x_position                 , y_position - tile.nw)
+                    //     .lineTo(x_position + tile_width / 2, y_position - tile.ne + tile_height / 2)
+                    //     .lineTo(x_position - tile_width / 2, y_position - tile.sw + tile_height / 2)
+                    //     .fill()
+                    //     .closePath()
+                    // # and a polygon for the front triangle, SE -> NE -> SW -> SE
+                    // @context
+                    //     .beginPath()
+                    //     .set("fillStyle", @colour((tile.ne + tile.sw) / 2, tile.se))
+                    //     .moveTo(x_position                 , y_position - tile.se + tile_height)
+                    //     .lineTo(x_position + tile_width / 2, y_position - tile.ne + tile_height / 2)
+                    //     .lineTo(x_position - tile_width / 2, y_position - tile.sw + tile_height / 2)
+                    //     .fill()
+                    //   .closePath()
+                    // tile
+                };
+
+                drawGrid(mountain);
+
+
+            });
+        </script>
+    </head>
+    <body>
+        <div class="viz">
+        </div>
+        <canvas id="stage" width="1200" height="900">
+        </canvas>
+    </body>
 </html>

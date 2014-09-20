@@ -25,6 +25,7 @@ MountainGenerator = function(config) {
         /* Assign the center and the corners. This will be the seed */
         grid[0][0] = grid[0][size - 1] = grid[size - 1][0] = grid[size - 1][size - 1] = 0;
         grid[middle][middle] = seed;
+        grid[0][middle] = grid[middle][0] = grid[size - 1][middle] = grid[middle][size - 1] = 0;
 
         var expand = function(coords) {
             var result = [];
