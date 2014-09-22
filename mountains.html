@@ -14,15 +14,20 @@
         </style>
         <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
         <script type="text/javascript" src="/underscore-min.js"></script>
-        <script type="text/javascript" src="/mountain-generator.js"></script>
+        <script type="text/javascript" src="/vendor/neon/neon.js"></script>
+        <script type="text/javascript" src="/Mountain.js"></script>
+        <script type="text/javascript" src="/Util.js"></script>
+        <script type="text/javascript" src="/CoordinateSystem.js"></script>
         <script>
             $(function() {
 
-                var mountain = new MountainGenerator({
+                var mountain = new Mountain({
                     resolution : 4,
                     randomness : 200,
                     seed : 500,
-                }).generate();
+                });
+                mountain = mountain._grid;
+
                 console.log("MOUNTAIN", mountain);
                 var startX = $('canvas').width() / 2;
                 var startY = $('canvas').height() / 2;
@@ -38,11 +43,11 @@
                 };
 
                 var drawGrid = function(grid) {
-
+                    // drawHeightTable(grid);
                     drawCanvas(grid);
                 };
 
-                var drawHeightTable = function() {
+                var drawHeightTable = function(grid) {
                     var max = getMax(grid);
                     var table = $('<table>').appendTo($('.viz'));
                     for(var y = 0; y < grid.length; y++) {
@@ -74,7 +79,7 @@
                     var g = 191;
                     var b = 64;
                     var color = "rgb(" + r + "," + g + "," + b + ")";
-                    console.log("COLOR: ", color, top, bottom);
+                    // console.log("COLOR: ", color, top, bottom);
                     return color;
                 };
 
@@ -86,8 +91,8 @@
                     var xPos = startX + (x * tw / 2) - (y * tw / 2),
                         yPos = startY + (x * th / 2) + (y * th / 2);
 
-                    console.group([x, y]);
-                    console.log("STARTING POINT: ", x, y, xPos, yPos)
+                    // console.group([x, y]);
+                    // console.log("STARTING POINT: ", x, y, xPos, yPos)
 
                     var NW = Math.round(grid[y][x]),
                         NE = Math.round(grid[y][x + 1]),
@@ -98,10 +103,10 @@
                         SW_POS = [xPos - tw / 2, yPos - SW + th / 2],
                         SE_POS = [xPos, yPos - SE + th];
 
-                    console.log("NW: ", NW_POS);
-                    console.log("NE: ", NE_POS);
-                    console.log("SE: ", SE_POS);
-                    console.log("SW: ", SW_POS);
+                    // console.log("NW: ", NW_POS);
+                    // console.log("NE: ", NE_POS);
+                    // console.log("SE: ", SE_POS);
+                    // console.log("SW: ", SW_POS);
 
                     // if(y % 2 == 0) {
                         // Draws the ABC triangle, with A in the top and
@@ -127,7 +132,7 @@
                         context.closePath();
                     // }
 
-                    console.groupEnd();
+                    // console.groupEnd();
 
                     //
 
@@ -167,6 +172,19 @@
                 };
 
                 drawGrid(mountain);
+
+                var cs = new CoordinateSystem({
+                    initialDimensions : {
+                        width : mountain[0].length,
+                        height : mountain.length
+                    }
+                });
+
+                cs.mergeGrid(mountain, 0, 0, function(_, x) {
+                    return Math.round(x);
+                });
+
+                cs._debug();
 
 
             });
